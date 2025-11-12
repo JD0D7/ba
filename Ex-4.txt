@@ -1,0 +1,263 @@
+﻿Ex.No. : 4                                  Food Delivery Website
+
+
+Problem Statement:
+Create a food delivery website where users can order food from a particular restaurant listed on the website.
+Once a user visits a site to order food delivery, they use on-site search to choose the restaurant,
+compare menus, and check out prices and ratings. Then, they select food and place the order.
+When the order is confirmed, the user logins to the system or creates a new account by providing contact and bank account details. After the checkout process, if the payment was successful, they receive a notification that the order has been processed. Getting notified the order has been processed is the end of the online scenario of a typical food-ordering website. Other stages including food preparation and order delivery happens offline.The site needs to be customized for three user roles: the user, the restaurant and the admin. All three should be connected in the website back-end and work seamlessly.
+
+
+Aim:
+To create a food delivery website where users can order food from a particular restaurant listed on the website using NodeJS and MongoDB.
+
+Functional requirements: 
+Use Case diagram:
+ https://lh7-us.googleusercontent.com/6RmbDiqc6EWdxcZzcCdX9RNVf9yhjj0faWaH-l6nUTOzhqdKFzyjtEUEPQcUPw6t2ZkiuGg0ah8cJCBp61gHYkvAnssnEDiS5l-5EaGtNwWTp_ukCzenTDR0rghdpqotsWeWHiD_PQm5kD2atCbGVQ 
+
+
+
+
+
+
+
+
+
+
+Source Code:
+//app.js
+const express = require('express');
+const { MongoClient } =  require("mongodb");
+
+
+const app = express();
+
+
+app.use(express.json());       
+app.use(express.urlencoded({extended: true})); 
+ 
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+ 
+app.post("/", (req, res) => {
+  const dish_name = req.body.dish;
+  const quantity_dish = req.body.quantity;
+  main(dish_name, quantity_dish);
+  res.send("Data received");
+});
+ 
+app.listen(3000);
+async function main(dish_name, quantity_dish)
+{
+    const url = "mongodb://127.0.0.1:27017/";
+    const client = new MongoClient(url);
+    try{
+        await client.connect();
+        const dbList = await client.db("Food-app").createCollection("Order");
+        await client.db("Food-app").collection("Order").insertOne({Dish: dish_name, Quantity: quantity_dish});
+    }
+    catch(e){
+        console.error(e);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+
+//index.ejs
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Display MongoDB Data</title>
+  <link rel="stylesheet" type="text/css" href="/public/style.css">
+  <style>.a{
+    color: black;
+    text-align: center;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+
+li {
+    float: left;
+}
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+li a:hover {
+    background-color: #111;
+}
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+pre{
+    font-size: large;
+}</style>
+</head>
+<body>
+    <div>
+        <ul>
+            <li><a href="/" >Home</a></li>
+            <li><a href="search.html">Search</a></li>
+            <li><a href="cart.html" >Cart</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </div>
+    <h1>Food delivery App</h1>
+  <h2>Buy The Top 3 Food-Item our App</h2>
+  <ol>
+    <% items.forEach(function(item) { %>
+      <li>  <%= item.dish_name %></li><br><br>
+    <% }); %>
+  </ol>
+  <h2>Give your order here</h2>
+<form action="/" method="POST">
+    <label>Enter the dish you want to order</label><br>
+    <input type="text" name="dish"><br><br>
+    <label>Enter the quantity</label><br>
+    <input type="number" name="quantity"><br><br>
+    <input type="submit" value="Place order"><br><br>
+</form>
+</body>
+</html>
+
+
+//cart.ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery App</title>
+    <style>
+        .a{
+            color: black;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+
+        li {
+            float: left;
+        }
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        li a:hover {
+            background-color: #111;
+        }
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 30%;
+        }
+        pre{
+            font-size: large;
+        }
+    </style>
+    <script>
+      function change(){
+        alert("Payment successful!")
+      }
+    </script>
+</head>
+<body>
+    <div>
+        <ul>
+            <li><a href="/" >Home</a></li>
+            <li><a href="search.html">Search</a></li>
+            <li><a href="cart.html" >Cart</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </div>
+    <h1>Food delivery App</h1>
+    <h2>Place your order now!</h2>
+    <h3>Items in cart</h3>
+    <ol>
+      <% items.forEach(function(item) { %>
+        <li>   <%= item.Dish %> - <%= item.Quantity %></li><br>
+      <% }); %>
+    </ol>
+    <br><button type="submit" onclick="change()">Proceed to Payment</button>
+</body>
+</html>
+
+
+//package.json
+{
+  "name": "food-delivery-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.1.0"
+  }
+}
+
+
+
+
+
+
+Snapshots:
+
+
+ https://lh7-us.googleusercontent.com/RfVcOiRBGWY7bUB9bElKpww-ul7D5BVsIGfQLBIz50ZuKXzcxkAzoqqig-mYanJtR8p7LByMrJmcfprAhnY9b8HD6MycFFch2JUB8nqjIBZFM2u05mJD3nGLGCwFm8A-TaJYPe4wxgXH4YGgYnl30g 
+
+ https://lh7-us.googleusercontent.com/6VEm34nObm7k8t1Oiyl-z0bHxjxMGh-irbsP4Bq8b-KdwuKJ-oqq3KVYY9ZXNrUYb6Ie_03RrfGOWh5QquEJfK5KmIFrZWSM6lVGxWrPKnZ7WSpE6mvlpTYaE068pfChI15SmmfvRRTbzylDiAleZQ 
+ https://lh7-us.googleusercontent.com/KBmQKO4YQbcrb50uMAkOj9xNX_bEJTH-5o1B_kYtrFXzyEBpbmtw71f4NNswGYgLYU4P56VcuXQP7rMSWustcy6OiFLFJ1h1ndJUabIWKfGTGkpb-OeG01Ug1SN1djZ-OPlMy99Ui0DFch9qevPsrA 
+
+ https://lh7-us.googleusercontent.com/slGnrKqwYN7aDKUFeRq70H3Y7YHOzAgf8G8jS1PUSQPr7AUrnDm_uuUxryRnyyAUfFTpgzRY_lfp6QYiFcKnIf_E0GUNM2hIH6vy2nfZ19HeqB9aKJdmENwMDXCZTIbUlzEAmP7mmAFz65C0S3m7WA 
+
+
+
+
+
+ https://lh7-us.googleusercontent.com/UacTCDj9Bpxg8rppeLwopc-8OM-yxOuGEUtQnn5ZLGVQQtpk305vLbJxQ54dlJepwazcy3lwR04MVtp-W0b9RXzQWL1oLnG0I6s9YfPc78f3_CSBy-QUli5ohXg1xHMKd74H6dBN2QsIpjfmtKw8Ag 
+
+ https://lh7-us.googleusercontent.com/rIiLyIfbic2vqip3XHY_DYyMlb-R_kZpKohAUJa4sKPjJMCW8rAGjeWIBxkjTgHCw_XNgNy5zdXcDxbqyhVU4_fs8CtJuXWOfHSDvdECGqIXp_EaR6OftnbUViytWzyvhSxDr07YeE0j4Vmcb7vmPQ 
+
+
+
+
+
+
+
+
+
+
+
+
+Result:
+Thus the food delivery website is created using NodeJS and MongoDB.

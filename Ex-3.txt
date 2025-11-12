@@ -1,0 +1,168 @@
+﻿Ex.No. : 3                                  Micro blogging Web Application
+
+
+Problem Statement:
+Create a simple micro blogging application (like twitter) that allows people to
+post their content which can be viewed by people who follow them.
+Microblogging is a short blog post designed for quick and typically direct audience
+interactions. These concise blogs are shared using social media platforms like Twitter or
+Instagram, and can include different content formats such as audio, text, images or video.
+Microblogging enables users to weigh in on trending topics or reach friends or family, and
+organizations to reach their prospective audiences. Shared content includes user-generated
+content, event highlights, news updates, memes and quotes.
+Tips for making an effective microblog:
+* Make content easily digestible.
+* Use humor.
+* Share personal stories and experiences.
+Aim:
+To create a simple micro blogging application (like twitter) that allows people to post their content which can be viewed by people who follow them using NodeJS and MongoDB
+Functional requirements: 
+Use Case diagram
+ https://lh7-us.googleusercontent.com/RBwWUpshe94dljCdXeGnzkvwje90Np4mcWD7CMdfnGp5t8xqq_cd19HBJ9RYIFtygHcNE3XKk-AiN_E19PBedlO0A-SkycoGip9wove-em1kHr9A-PHNAYXIA2XgRYYy3bMdlCKTBamI_yJitsBNLQ 
+
+
+
+Source Code:
+//server.js
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const app = express();
+ 
+// Connect to MongoDB  mongodb+srv://sridevi:Srsv%400714@cluster0.ovbmgg2.mongodb.net/
+mongoose.connect('mongodb+srv://sridevi:Srsv%400714@cluster0.ovbmgg2.mongodb.net/microblog', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+
+// Create a schema for blog posts
+const postSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+});
+
+
+const Post = mongoose.model('Post', postSchema);
+
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+
+// Route to create a new blog post
+app.post('/api/posts', async (req, res) => {
+  try {
+    // Create a new Post document based on the request body
+    const newPost = new Post({
+      title: req.body.title,
+      content: req.body.content,
+    });
+
+
+    // Save the new post to the database
+    await newPost.save();
+    
+    res.status(201).send('Post created successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error creating post');
+  }
+});
+
+
+// Route to retrieve all blog posts
+app.get('/api/posts', async (req, res) => {
+  try {
+    const posts = await Post.find({});
+    res.json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching posts');
+  }
+});
+
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+//package.json
+{
+  "name": "my-microblog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "mongoose": "^7.6.0"
+  }
+}
+//index.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Microblog</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body style="align-items: center; justify-content: center;">
+  <h1>Microblog</h1>
+  <br><br><br>
+  <form class=form-container action="/api/posts" method="POST">
+    <div class="form-group">
+    <input type="text" name="title" placeholder="Title" required><br><br>
+    <textarea name="content" placeholder="Content" required></textarea><br><br>
+    <button type="submit">Create Post</button>
+    </div>
+  </form>
+  <div class=blog-container id="posts"></div><br><br>
+  <script src="script.js"></script><br><br>
+</body>
+</html>
+//script.js
+document.addEventListener('DOMContentLoaded', () => {
+    const postsContainer = document.getElementById('posts');
+  
+    // Fetch and display posts
+    fetch('/api/posts')
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((post) => {
+          const postDiv = document.createElement('div');
+          postDiv.innerHTML = `
+            <h2>${post.title}</h2><br>
+            <p>${post.content}</p><br><br>
+          `;
+          postsContainer.appendChild(postDiv);
+        });
+      });
+  });
+
+
+Snapshots
+
+
+ https://lh7-us.googleusercontent.com/H91-VZoDx-8eXUDl249B1uDS9BSFdQzs4t3uGNhA1LOfw3_nf_YBq6JsB6ynIZN25rxxt-aGi4X8OdkDztVuMKDBgjRqTGEfHsikwEwgOSNaxEH8FMcVlWdTLtXMt6E0jFiy0pepkVxi5MsdwRNgqQ 
+
+ https://lh7-us.googleusercontent.com/heNHfN01o1eciVM7iq7aBHi5S7AYPkczlLOBYNFJMDsjzB8brtD2BDhQMYl3k91v3vZqsho4kAk4etT0py0OAiE_wJ84dtjLLbu3M46pDEit4JeFvCG-KpC1IMhDcEOj5W0oJhnk1gX4ETReaOtzVw 
+
+ https://lh7-us.googleusercontent.com/LDo7oZzBbNXp3qxJOcAmETO4nSQSvpti666dxKKprEjkqQ5rZ6M_h4W_rIGvD3fmX8uMnuwseMz4Lln59X-7LiU7I-EksnMr1WnzmDc7Ma3xw8rFdA8NjAZBqjUuenx3tHKFhAYWDD3idO9mSAUuVA 
+
+                                                                                
+
+
+
+
+
+
+Result
+Thus the simple micro blogging application is developed using NodeJS and MongoDB
